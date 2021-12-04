@@ -6,7 +6,7 @@ import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
 
 public interface LivroRepository extends JpaRepository<Livro, Long> {
 
-	boolean existsByIsbn(String isbn);
+ 	boolean existsByIsbn(String isbn);
 	
 	
 

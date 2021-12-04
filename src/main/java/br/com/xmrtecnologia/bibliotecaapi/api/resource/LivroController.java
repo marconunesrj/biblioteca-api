@@ -21,7 +21,7 @@ import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
 
 @RestController
 @RequestMapping("/livros")
-public class LivroController {
+public class LivroController { 
 
 	private LivroService livroService;
 	private ModelMapper modelMapper;

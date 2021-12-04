@@ -8,7 +8,7 @@ import org.springframework.validation.BindingResult;
 
 import br.com.xmrtecnologia.bibliotecaapi.exception.BusinessException;
 
-public class ApiErros {
+public class ApiErros { 
 	
 	private List<String> errors;
 	

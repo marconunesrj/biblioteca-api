@@ -50,7 +50,7 @@ public class LivroRepositoryTest {
 	public void deveRetornarFalseNaoExistirIsbnInformado( ) {
 		
 		// cenario
-		String isbn = "1234";
+		String isbn = "1234";  
 		
 		// execução
 		boolean exists = repository.existsByIsbn(isbn);

@@ -59,7 +59,7 @@ public class LivroServiceTest {
 		assertThat(livroSalvo.getTitulo()).isEqualTo("As aventuras");
 		assertThat(livroSalvo.getIsbn()).isEqualTo("123456");
 
-	}
+	} 
 
 	@Test
 	@DisplayName("Deve lançar erro de negócio ao tentar salvar um livro com isbn duplicado")

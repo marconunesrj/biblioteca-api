@@ -15,7 +15,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class LivroDTO {
 	
-	private Long id;
+	private Long id; 
 	
 	@NotEmpty
 	private String titulo;
