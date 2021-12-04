@@ -3,6 +3,8 @@ package br.com.xmrtecnologia.bibliotecaapi.api.resource;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Optional;
+
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -59,9 +61,14 @@ public class LivroControllerTest {
 		MockHttpServletRequestBuilder request = MockMvcRequestBuilders.post(LIVRO_API)
 				.contentType(MediaType.APPLICATION_JSON).accept(MediaType.APPLICATION_JSON).content(json);
 
-		mvc.perform(request).andExpect(status().isCreated()).andExpect(jsonPath("id").isNotEmpty())
-				.andExpect(jsonPath("id").value(1L)).andExpect(jsonPath("titulo").value(dto.getTitulo()))
-				.andExpect(jsonPath("autor").value(dto.getAutor())).andExpect(jsonPath("isbn").value(dto.getIsbn()));
+		mvc
+			.perform(request)
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("id").isNotEmpty())
+				.andExpect(jsonPath("id").value(1L))
+				.andExpect(jsonPath("titulo").value(dto.getTitulo()))
+				.andExpect(jsonPath("autor").value(dto.getAutor()))
+				.andExpect(jsonPath("isbn").value(dto.getIsbn()));
 
 		// Igual ao de cima , sem o static import
 //		.andExpect( MockMvcResultMatchers.status().isCreated())
@@ -70,10 +77,6 @@ public class LivroControllerTest {
 //		.andExpect( MockMvcResultMatchers.jsonPath("autor").value("Autou"))
 //		.andExpect( MockMvcResultMatchers.jsonPath("isbn").value("1234567890"));
 
-	}
-
-	private LivroDTO criarNovoLivro() {
-		return LivroDTO.builder().autor("Artur").titulo("As aventuras").isbn("123456").build();
 	}
 
 	// Validação de Integridade de Objeto
@@ -113,5 +116,154 @@ public class LivroControllerTest {
 			.andExpect(jsonPath("errors", Matchers.hasSize(1)))
 			.andExpect(jsonPath("errors[0]").value(menssagemErro));
 	}
+	
+	@Test
+	@DisplayName("Deve obter informações de um livro.")
+	public void pegarDetalhesLivroTest() throws Exception {
+		
+		// cenario (given)
+		Long id = 1l;
+		
+		Livro livro = Livro.builder().id(id).autor("Artur").titulo("As aventuras").isbn("123456").build();
+		
+		BDDMockito.given(service.getById(id)).willReturn(Optional.of(livro));
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.get(LIVRO_API.concat("/" +id))
+													.accept(MediaType.APPLICATION_JSON);
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("id").value(id))
+			.andExpect(jsonPath("titulo").value(livro.getTitulo()))
+			.andExpect(jsonPath("autor").value(livro.getAutor()))
+			.andExpect(jsonPath("isbn").value(livro.getIsbn()));
+			
+	}
+	
+	@Test
+	@DisplayName("Deve retornar resource not found quando o livro procurado não existir.")
+	public void LivroNaoEncontradoTest() throws Exception {
+		// cenario (given)
+		BDDMockito.given(service.getById(Mockito.anyLong())).willReturn(Optional.empty());
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.get(LIVRO_API.concat("/" +1L))
+													.accept(MediaType.APPLICATION_JSON);
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	@DisplayName("Deve excluir um livro.")
+	public void excluirLivroTest() throws Exception {
+		
+		// cenario (given)
+		BDDMockito.given(service.getById(Mockito.anyLong()))
+					.willReturn(Optional.of(Livro.builder().id(1L).build()));
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.delete(LIVRO_API.concat("/" +1L));
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isNoContent());
+	}
+	
+	@Test
+	@DisplayName("Deve retornar resource not found quando não encontrar o livro para excluir.")
+	public void excluirLivroInexistenteTest() throws Exception {
+		
+		// cenario (given)
+		BDDMockito.given(service.getById(Mockito.anyLong()))
+					.willReturn(Optional.empty());
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.delete(LIVRO_API.concat("/" +1L));
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isNotFound());
+	}
+	
+	@Test
+	@DisplayName("Deve atualizar um livro.")
+	public void atualizarLivroTest() throws Exception {
+		
+		// cenario (given)
+		Long id = 1L;
+		String json = new ObjectMapper().writeValueAsString(criarNovoLivro());
+		Livro livro = Livro.builder()
+				.id(id)
+				.autor("Marco")
+				.titulo("Eu vou conseguir")
+				.isbn("10")
+				.build();
+		BDDMockito.given(service.getById(Mockito.anyLong()))
+					.willReturn(Optional.of(livro));
+		Livro livroAtualizado = Livro.builder().id(id).autor("Artur").titulo("As aventuras").isbn("123456").build();
+		BDDMockito.given(service.atualizar(livro)).willReturn(livroAtualizado);
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.put(LIVRO_API.concat("/" +id))
+													.content(json)
+													.accept(MediaType.APPLICATION_JSON)
+													.contentType(MediaType.APPLICATION_JSON);
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isOk())			
+			.andExpect(jsonPath("id").value(id))
+			.andExpect(jsonPath("titulo").value(criarLivro().getTitulo()))
+			.andExpect(jsonPath("autor").value(criarLivro().getAutor()))
+			.andExpect(jsonPath("isbn").value(criarLivro().getIsbn()));
+
+	}
+	
+	@Test
+	@DisplayName("Deve retornar resource not found quando não encontrar o livro para atualizar.")
+	public void atualizarLivroInexistenteTest() throws Exception {
+		
+		// cenario (given)
+		Long id = 1L;
+		String json = new ObjectMapper().writeValueAsString(criarNovoLivro());
+		BDDMockito.given(service.getById(Mockito.anyLong()))
+					.willReturn(Optional.empty());
+		
+		// execução (when)
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.put(LIVRO_API.concat("/" +id))
+													.content(json)
+													.accept(MediaType.APPLICATION_JSON)
+													.contentType(MediaType.APPLICATION_JSON);
+		
+		// verificação
+		mvc
+			.perform(request)
+			.andExpect(status().isNotFound());
+	}
+	
+	
+	private LivroDTO criarNovoLivro() {
+		return LivroDTO.builder().autor("Artur").titulo("As aventuras").isbn("123456").build();
+	}
+
+	private Livro criarLivro() {
+		return Livro.builder().autor("Artur").titulo("As aventuras").isbn("123456").build();
+	}
+
 
 }

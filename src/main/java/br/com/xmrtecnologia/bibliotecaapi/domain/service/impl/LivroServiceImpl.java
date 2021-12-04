@@ -1,5 +1,7 @@
 package br.com.xmrtecnologia.bibliotecaapi.domain.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
@@ -22,6 +24,23 @@ public class LivroServiceImpl implements LivroService{
 			throw new BusinessException("Isbn já cadastrado.");
 		}
 		return livroRepository.save(livro);
+	}
+
+	@Override
+	public Optional<Livro> getById(Long id) {
+		
+		return null;
+	}
+
+	@Override
+	public void excluir(Livro livro) {
+		
+		
+	}
+
+	@Override
+	public Livro atualizar(Livro livro) {
+		return this.save(livro);
 	}
 
 }
