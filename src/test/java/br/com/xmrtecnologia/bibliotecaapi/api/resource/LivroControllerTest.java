@@ -39,11 +39,12 @@ import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
 //@RunWith(SpringRunner.class)// JUnit4 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
-@WebMvcTest
+// Para subir Somente o Controller de Livro quando for Fazer os Testes
+@WebMvcTest(controllers = (LivroController.class))
 @AutoConfigureMockMvc
 public class LivroControllerTest {
 
-	static String LIVRO_API = "/livros;";
+	static String LIVRO_API = "/livros";
 
 	@Autowired
 	MockMvc mvc;

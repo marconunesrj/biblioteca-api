@@ -18,5 +18,7 @@ public interface LivroService {
 	Livro atualizar(Livro livro);
 
 	Page<Livro> listar(Livro filtro, Pageable pageRequest);
+
+	Optional<Livro> getLivroByIsbn(String isbn);
 	 
 }
