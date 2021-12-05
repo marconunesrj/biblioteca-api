@@ -111,7 +111,7 @@ public class LivroRepositoryTest {
 		
 		Livro livroExcluido = entityManager.find(Livro.class, livro.getId());
 		
-		// Verificação
+		// Verificação 
 		assertThat(livroExcluido).isNull();
 		
 	}
