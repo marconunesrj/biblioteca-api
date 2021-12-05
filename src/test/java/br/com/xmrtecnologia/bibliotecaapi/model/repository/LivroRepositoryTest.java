@@ -2,6 +2,8 @@ package br.com.xmrtecnologia.bibliotecaapi.model.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,6 +60,59 @@ public class LivroRepositoryTest {
 		
 		// verificação
 		assertThat(exists).isFalse();
+		
+	}
+	
+	@Test
+	@DisplayName("Deve obter um Livro por Id.")
+	public void obterLivroIdTest () {
+		// cenário
+		// Cria um livro fictício para poder testar, sem Id
+		Livro livro = criarNovoLivro();
+		entityManager.persist(livro);
+		
+		
+		// execução
+		Optional<Livro> livroEncontrado = repository.findById(livro.getId());
+		
+		// verificação
+		assertThat(livroEncontrado.isPresent()).isTrue();
+	}
+	
+	@Test
+	@DisplayName("Deve salvar um Livro")
+	public void salvarLivroTest() {
+		
+		// cenário
+		Livro livro = criarNovoLivro();
+		
+		
+		// execução
+		Livro livroSalvo = repository.save(livro);
+		
+		// verificação
+		assertThat(livroSalvo.getId()).isNotNull();
+		
+	}
+	
+	@Test
+	@DisplayName("Deve excluir um Livro")
+	public void excluirLivroTest() {
+		
+		// cenário
+		// Cria um livro fictício para poder testar
+		Livro livro = criarNovoLivro();
+		entityManager.persist(livro);
+		
+		// Execução
+		Livro livroEncontrado = entityManager.find(Livro.class, livro.getId());
+		
+		repository.delete(livroEncontrado);
+		
+		Livro livroExcluido = entityManager.find(Livro.class, livro.getId());
+		
+		// Verificação
+		assertThat(livroExcluido).isNull();
 		
 	}
 	

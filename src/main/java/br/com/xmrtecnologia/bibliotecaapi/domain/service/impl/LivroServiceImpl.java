@@ -27,20 +27,26 @@ public class LivroServiceImpl implements LivroService{
 	}
 
 	@Override
-	public Optional<Livro> getById(Long id) {
-		
-		return null;
+	public Optional<Livro> getById(Long id) {		
+		return livroRepository.findById(id);
 	}
 
 	@Override
 	public void excluir(Livro livro) {
-		
+		if(livro == null || livro.getId() == null ) {
+			throw new IllegalArgumentException("Livro Id não pode ser nulo.");
+		}
+		this.livroRepository.delete(livro);
 		
 	}
 
 	@Override
 	public Livro atualizar(Livro livro) {
-		return this.save(livro);
+		if(livro == null || livro.getId() == null ) {
+			throw new IllegalArgumentException("Livro Id não pode ser nulo.");
+		}
+		
+		return this.livroRepository.save(livro);
 	}
 
 }
