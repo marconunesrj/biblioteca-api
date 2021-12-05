@@ -1,8 +1,14 @@
 package br.com.xmrtecnologia.bibliotecaapi.api.resource;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.validation.Valid;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -71,6 +77,22 @@ public class LivroController {
 		return livroService
 				.getById(id).map(livro -> modelMapper.map(livro, LivroDTO.class))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+	}
+	
+	// Passando parâmetros pela URL "/livros?titulo=%s&autor=%s&page=0&size=100"
+	@GetMapping
+	public Page<LivroDTO> listar ( LivroDTO livroDTO, Pageable pageRequest) {
+		Livro filtro = modelMapper.map(livroDTO, Livro.class);
+		
+		Page<Livro> resultado = livroService.listar(filtro, pageRequest);
+		
+		List<LivroDTO> list = resultado.getContent()
+				.stream()
+				.map(livro -> modelMapper.map(livro, LivroDTO.class))
+				.collect(Collectors.toList());
+		
+		return new PageImpl<LivroDTO>(list, pageRequest, resultado.getTotalElements());
+		
 	}
 	
 	@PutMapping("{id}")

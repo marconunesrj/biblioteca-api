@@ -3,6 +3,7 @@ package br.com.xmrtecnologia.bibliotecaapi.api.resource;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hamcrest.Matchers;
@@ -15,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -256,6 +261,45 @@ public class LivroControllerTest {
 			.andExpect(status().isNotFound());
 	}
 	
+	@Test
+	@DisplayName("Deve filtrar livros em uma busca")
+	public void buscarLivrosTest() throws Exception {
+		
+		// cenário
+		Long id = 1l;
+		Livro livro = Livro.builder()
+				.id(id)
+				.autor(criarLivro().getAutor())
+				.titulo(criarLivro().getTitulo())
+				.isbn(criarLivro().getIsbn())
+				.build();
+		
+		//Livro[] arrayLivros = {livro};
+		
+		//Pageable pageRequest = PageRequest.of(0, 100);
+				
+		Page<Livro> paginacao = new PageImpl<Livro>( Arrays.asList(livro), PageRequest.of(0, 100) , 1l);
+		
+		BDDMockito.given(service.listar(Mockito.any(Livro.class), Mockito.any(Pageable.class)))
+			.willReturn( (Page<Livro>) paginacao );
+		
+		
+		// "/livros?"
+		String queryString = String.format("?titulo=%s&autor=%s&page=0&size=100", 
+				livro.getTitulo(), livro.getAutor());
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.get(LIVRO_API.concat(queryString))
+													.accept(MediaType.APPLICATION_JSON);
+		
+		mvc
+			.perform(request)
+			.andExpect( status().isOk() )
+			.andExpect( jsonPath("content", Matchers.hasSize(1)))
+			.andExpect( jsonPath("totalElements").value(1) )
+			.andExpect( jsonPath("pageable.pageSize").value(100))
+			.andExpect( jsonPath("pageable.pageNumber").value(0));
+	}
 	
 	private LivroDTO criarNovoLivro() {
 		return LivroDTO.builder().autor("Artur").titulo("As aventuras").isbn("123456").build();

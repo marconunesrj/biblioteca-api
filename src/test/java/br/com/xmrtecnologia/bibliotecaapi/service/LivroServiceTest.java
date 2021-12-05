@@ -2,6 +2,8 @@ package br.com.xmrtecnologia.bibliotecaapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -11,6 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -194,6 +200,33 @@ public class LivroServiceTest {
 		
 		// verificação
 		Mockito.verify(livroRepository, Mockito.never()).save(livro);
+		
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	@DisplayName("Deve filtrar livros pelas propriedades")
+	public void listarLivrosFiltradosTest() {
+
+		// cenário
+		Livro livro = criarLivro();
+		PageRequest pageRequest = PageRequest.of(0, 10);
+		List<Livro> lista = Arrays.asList(livro);
+		
+		Page<Livro> paginacao = new PageImpl<Livro>(lista, pageRequest, 1l);
+		
+		Mockito.when(livroRepository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class)))
+			.thenReturn(paginacao);
+		
+		// Execução
+		Page<Livro> resultado = livroService.listar(livro, pageRequest);
+		
+		// verificação
+		assertThat(resultado.getTotalElements()).isEqualTo(1);
+		assertThat(resultado.getContent()).isEqualTo(lista);
+		assertThat(resultado.getPageable().getPageNumber()).isEqualTo(0);
+		assertThat(resultado.getPageable().getPageSize()).isEqualTo(10);
+		
 		
 	}
 	
