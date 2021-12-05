@@ -103,7 +103,7 @@ public class LivroRepositoryTest {
 		// Cria um livro fictício para poder testar
 		Livro livro = criarNovoLivro();
 		entityManager.persist(livro);
-		
+		 
 		// Execução
 		Livro livroEncontrado = entityManager.find(Livro.class, livro.getId());
 		
