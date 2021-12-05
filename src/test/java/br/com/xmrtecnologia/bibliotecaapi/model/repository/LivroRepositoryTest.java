@@ -107,7 +107,7 @@ public class LivroRepositoryTest {
 		// Execução
 		Livro livroEncontrado = entityManager.find(Livro.class, livro.getId());
 		
-		repository.delete(livroEncontrado);
+		repository.delete(livroEncontrado); 
 		
 		Livro livroExcluido = entityManager.find(Livro.class, livro.getId());
 		
