@@ -1,6 +1,7 @@
 package br.com.xmrtecnologia.bibliotecaapi.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 
 import java.util.Arrays;
 import java.util.List;
@@ -229,6 +230,30 @@ public class LivroServiceTest {
 		
 		
 	}
+	
+	@Test
+	@DisplayName("Deve obter um livro pelo Isbn")
+	public void getLivroByIsbnTest( ) {
+		
+		// cenário
+		String isbn = "123";
+		
+		Mockito.when(livroRepository.findByIsbn(isbn))
+			.thenReturn(Optional.of(Livro.builder().id(1l).isbn(isbn).build()));
+		
+		// execução
+		Optional<Livro> livro = livroService.getLivroByIsbn(isbn);
+		
+		
+		// verificação
+		assertThat(livro.isPresent()).isTrue();
+		assertThat(livro.get().getId()).isEqualTo(1l);
+		assertThat(livro.get().getIsbn()).isEqualTo(isbn);
+		
+		verify(livroRepository, Mockito.times(1)).findByIsbn(isbn);
+		
+	}
+	
 	
 	private Livro criarLivro() {
 		return Livro.builder().id(1L).autor("Artur").titulo("As aventuras").isbn("123456").build();

@@ -68,7 +68,7 @@ public class LivroServiceImpl implements LivroService{
 	@Override
 	public Optional<Livro> getLivroByIsbn(String isbn) {
 		
-		return null;
+		return livroRepository.findByIsbn(isbn);
 	}
 
 }

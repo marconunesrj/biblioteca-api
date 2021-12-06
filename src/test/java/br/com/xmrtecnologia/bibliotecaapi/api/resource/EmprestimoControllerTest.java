@@ -1,5 +1,6 @@
 package br.com.xmrtecnologia.bibliotecaapi.api.resource;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -27,6 +28,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.xmrtecnologia.bibliotecaapi.api.dto.EmprestimoDTO;
+import br.com.xmrtecnologia.bibliotecaapi.api.dto.RetornadoEmprestimoDTO;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
 import br.com.xmrtecnologia.bibliotecaapi.exception.BusinessException;
@@ -71,7 +73,7 @@ public class EmprestimoControllerTest {
 										.livro(livro)
 										.dataEmprestimo(LocalDate.now())
 										.retornado(false).build();
-		BDDMockito.given( emprestimoService.save(Mockito.any(Emprestimo.class)))
+		BDDMockito.given( emprestimoService.salvar(Mockito.any(Emprestimo.class)))
 			.willReturn(emprestimo);
 		
 		// Execução
@@ -132,7 +134,7 @@ public class EmprestimoControllerTest {
 		BDDMockito.given(livroService.getLivroByIsbn(isbn) )
 				.willReturn(Optional.of(livro));
 
-		BDDMockito.given( emprestimoService.save(Mockito.any(Emprestimo.class)))
+		BDDMockito.given( emprestimoService.salvar(Mockito.any(Emprestimo.class)))
 			.willThrow(new BusinessException("Livro está emprestado."));
 		
 		// Execução
@@ -147,6 +149,83 @@ public class EmprestimoControllerTest {
 			.andExpect( status().isBadRequest())
 			.andExpect(jsonPath("errors", Matchers.hasSize(1)))
 			.andExpect(jsonPath("errors[0]").value("Livro está emprestado."));
+	}
+	
+	@Test
+	@DisplayName("Deve retornar um Livro.")
+	public void retornarLivroTest() throws Exception {
+		
+		// cenário { retornado; true }
+		RetornadoEmprestimoDTO dto = RetornadoEmprestimoDTO.builder().retornado(true).build();
+		Livro livro = Livro.builder()
+				.id(1l)
+				.isbn("123")
+				.build();
+		
+		Emprestimo emprestimo = Emprestimo.builder()
+				.id(1l)
+				.Cliente("Fulano")
+				.livro(livro)
+				.dataEmprestimo(LocalDate.now())
+				.build();
+		
+		BDDMockito.given(emprestimoService.getById(Mockito.anyLong()))
+			.willReturn(Optional.of(emprestimo));
+		
+		String json = new ObjectMapper().writeValueAsString(dto);
+
+		// execução
+//		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+//				.patch(EMPRESTIMO_API.concat("/1"))
+//				.accept(MediaType.APPLICATION_JSON)
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.content(json);
+		
+		
+		// verificação
+		mvc
+			.perform(
+					patch(EMPRESTIMO_API.concat("/1"))
+					.accept(MediaType.APPLICATION_JSON)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(json)
+			)
+			.andExpect(status().isOk());
+		
+		// Verificando se o método atualizar foi chamado 1 vez
+		Mockito.verify(emprestimoService, Mockito.times(1)).atualizar(emprestimo);
+		
+	}
+	
+	
+	@Test
+	@DisplayName("Deve retornar 404 quando tentar devolver um Livro inexistente.")
+	public void retornarLivroInexistenteTest() throws Exception {
+		
+		// cenário { retornado; true }
+		RetornadoEmprestimoDTO dto = RetornadoEmprestimoDTO.builder().retornado(true).build();
+		
+		BDDMockito.given(emprestimoService.getById(Mockito.anyLong()))
+			.willReturn(Optional.empty());
+		
+		String json = new ObjectMapper().writeValueAsString(dto);
+
+		// execução		
+		
+		// verificação
+		mvc
+			.perform(
+					patch(EMPRESTIMO_API.concat("/1"))
+					.accept(MediaType.APPLICATION_JSON)
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(json)
+			)
+			.andExpect(status().isNotFound());
+		
+		// Verificando se o método atualizar foi chamado o vez
+		Mockito.verify(emprestimoService, Mockito.times(0))
+			.atualizar(Emprestimo.builder().id(1l).build());
+		
 	}
 	
 	

@@ -116,7 +116,7 @@ public class LivroRepositoryTest {
 		
 	}
 	
-	private Livro criarNovoLivro() {
+	public static Livro criarNovoLivro() {
 		return Livro.builder().autor("Artur").titulo("As aventuras").isbn("123").build();
 	}
 
