@@ -1,6 +1,7 @@
 package br.com.xmrtecnologia.bibliotecaapi.model.repository;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,7 @@ public class EmprestimoRepositoryTest {
 //				.titulo("As aventuras")
 //				.build();
 		
-		Emprestimo emprestimo = criarEPersistirEmprestimo();
+		Emprestimo emprestimo = criarEPersistirEmprestimo(LocalDate.now());
 		
 		// execução
 		boolean existe = repository.existsByLivroAndNotRetornado(emprestimo.getLivro());
@@ -56,7 +57,7 @@ public class EmprestimoRepositoryTest {
 	public void findByLivroIsbnOrClienteTest () {
 		
 		// cenário
-		Emprestimo emprestimo = criarEPersistirEmprestimo();
+		Emprestimo emprestimo = criarEPersistirEmprestimo(LocalDate.now());
 		
 		PageRequest pageRequest = PageRequest.of(0, 10);
 
@@ -73,20 +74,48 @@ public class EmprestimoRepositoryTest {
 		assertThat(paginacao.getTotalElements()).isEqualTo(1);
 
 	}
+
+	@Test
+	@DisplayName("Deve obter empréstimos cuja data empréstimo seja menor ou igual a três dias atrás e não retornados.")
+	public void findByDataEmprestimoLessThanAndRetornadoFalseTest() {
+		Emprestimo emprestimo = criarEPersistirEmprestimo(LocalDate.now().minusDays(5));
+		
+		List<Emprestimo> resultado = repository.findByDataEmprestimoLessThanAndRetornadoFalse(LocalDate.now().minusDays(4));
+		
+		assertThat(resultado).hasSize(1);
+		assertThat(resultado).contains(emprestimo);
 	
-	public Emprestimo criarEPersistirEmprestimo() {
+	}
+	
+	@Test
+	@DisplayName("Deve retornar vazio quando a data empréstimo seja maior ou igual que a dois dias atrás e não retornados.")
+	public void notfindByDataEmprestimoLessThanAndRetornadoFalseTest() {
+		criarEPersistirEmprestimo(LocalDate.now().minusDays(2));
+		
+		List<Emprestimo> resultado = repository.findByDataEmprestimoLessThanAndRetornadoFalse(LocalDate.now().minusDays(4));
+		
+		assertThat(resultado).hasSize(0);
+		assertThat(resultado).isEmpty();
+	
+	}
+	
+	
+	public Emprestimo criarEPersistirEmprestimo(LocalDate localDate) {
 		Livro livro = criarNovoLivro();
 		entityManager.persist(livro);
 		
 		Emprestimo emprestimo = Emprestimo.builder()
 				.cliente("Marco")
+				.emailCliente("cliente@email.com")
 				.livro(livro)
-				.dataEmprestimo(LocalDate.now())
+				.dataEmprestimo(localDate)
 				.build();	
 		entityManager.persist(emprestimo);
 		
 		return emprestimo;
 		
 	}
+	
+	
 	
 }

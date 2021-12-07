@@ -13,9 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mockito;
-import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -38,15 +36,16 @@ public class EmprestimoServiceTest {
 
 	EmprestimoService emprestimoService;
 
-	@InjectMocks
-	ModelMapper modelMapper;
+	//@InjectMocks
+	//ModelMapper modelMapper;
 	
 	@MockBean
 	EmprestimoRepository emprestimoRepository;
 
 	@BeforeEach
 	public void setUp() {
-		this.emprestimoService = new EmprestimoServiceImpl(emprestimoRepository, modelMapper);
+		//this.emprestimoService = new EmprestimoServiceImpl(emprestimoRepository, modelMapper);
+		this.emprestimoService = new EmprestimoServiceImpl(emprestimoRepository);
 	}
 
 	@Test
@@ -59,6 +58,7 @@ public class EmprestimoServiceTest {
 		Emprestimo emprestimoAserSalvo = Emprestimo.builder()
 				.livro(livro)
 				.cliente(cliente)
+				.emailCliente("cliente@email.com")
 				.dataEmprestimo(LocalDate.now())  // obrigatório
 				.retornado(true)  // atributo obrigatório para poder salvar Regra de negócio
 				.build();
@@ -67,6 +67,7 @@ public class EmprestimoServiceTest {
 				.id(1l)
 				.livro(livro)
 				.cliente(cliente)
+				.emailCliente("cliente@email.com")
 				.dataEmprestimo(LocalDate.now())
 				.retornado(false)
 				.build();
@@ -119,6 +120,7 @@ public class EmprestimoServiceTest {
 		Emprestimo emprestimoAserSalvo = Emprestimo.builder()
 				.livro(livro)
 				.cliente("Fulano")
+				.emailCliente("cliente@email.com")
 				.dataEmprestimo(LocalDate.now()) // obrigatório
 				.retornado(false)  // obrigatório
 				.build();

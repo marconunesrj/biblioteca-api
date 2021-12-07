@@ -1,5 +1,8 @@
 package br.com.xmrtecnologia.bibliotecaapi.model.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -26,5 +29,11 @@ public interface EmprestimoRepository  extends JpaRepository<Emprestimo, Long> {
 			@Param("isbn") String isbn, 
 			@Param("cliente") String cliente, 
 			Pageable pageRequest);
+
+	Page<Emprestimo> findByLivro(Livro livro, Pageable pageable);
+
+	@Query( value = " select e from Emprestimo e where e.dataEmprestimo <= :dataAtraso and "
+						+ "( e.retornado is null or e.retornado is false ) " )
+	List<Emprestimo> findByDataEmprestimoLessThanAndRetornadoFalse(@Param("dataAtraso") LocalDate dataAtraso);
 
 }

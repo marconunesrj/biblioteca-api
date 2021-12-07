@@ -58,7 +58,7 @@ public class EmprestimoController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public Long adicionar( @RequestBody EmprestimoDTO dto) {
+	public Long adicionar( @Valid @RequestBody EmprestimoDTO dto) {
 		
 //		Livro livro = livroService.getLivroByIsbn(dto.getIsbn())
 //				  .get();

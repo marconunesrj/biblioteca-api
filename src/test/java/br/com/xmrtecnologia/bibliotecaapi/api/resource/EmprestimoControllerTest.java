@@ -67,7 +67,7 @@ public class EmprestimoControllerTest {
 		// cenário
 		String isbn = "123";
 		//Long id = 1l;
-		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").build();
+		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").emailCliente("cliente@email.com").build();
 		String json = new ObjectMapper().writeValueAsString(dto);
 			
 		Livro livro = Livro.builder().id(1l).isbn(isbn).build();
@@ -105,7 +105,7 @@ public class EmprestimoControllerTest {
 		// cenário
 		String isbn = "123";
 		//Long id = 1l;
-		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").build();
+		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").emailCliente("cliente@email.com").build();
 		String json = new ObjectMapper().writeValueAsString(dto);
 
 		//Livro livro = Livro.builder().id(1l).isbn(isbn).build();
@@ -133,7 +133,7 @@ public class EmprestimoControllerTest {
 		// cenário
 		String isbn = "123";
 		//Long id = 1l;
-		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").build();
+		EmprestimoDTO dto = EmprestimoDTO.builder().isbn(isbn).cliente("Fulano").emailCliente("cliente@email.com").build();
 		String json = new ObjectMapper().writeValueAsString(dto);
 
 		Livro livro = Livro.builder().id(1l).isbn(isbn).build();
@@ -172,6 +172,7 @@ public class EmprestimoControllerTest {
 		Emprestimo emprestimo = Emprestimo.builder()
 				.id(1l)
 				.cliente("Fulano")
+				.emailCliente("cliente@email.com")
 				.livro(livro)
 				.dataEmprestimo(LocalDate.now())
 				.build();

@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "application.mail.default.remetente",
+    "type": "java.lang.String",
+    "description": "A description for 'application.mail.default.remetente'"
+  },
+  {
+    "name": "application.mail.emprestimos.atrasados.mensagem",
+    "type": "java.lang.String",
+    "description": "A description for 'application.mail.emprestimos.atrasados.mensagem'"
+  }
+]}

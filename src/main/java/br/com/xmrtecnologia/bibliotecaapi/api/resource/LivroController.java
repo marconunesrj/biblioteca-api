@@ -21,24 +21,31 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.xmrtecnologia.bibliotecaapi.api.dto.EmprestimoFiltroDTO;
 import br.com.xmrtecnologia.bibliotecaapi.api.dto.LivroDTO;
+import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
+import br.com.xmrtecnologia.bibliotecaapi.model.entity.Emprestimo;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/livros")
+@RequiredArgsConstructor  // cria o construtor para as propriedades final
 public class LivroController { 
 
-	private LivroService livroService;
-	private ModelMapper modelMapper;
+	private final LivroService livroService;
+	private final ModelMapper modelMapper;
+	private final EmprestimoService emprestimoService;
 	
 
-	public LivroController(LivroService livroService, ModelMapper modelMapper) {
-		// injeção através do Construtor
-		this.livroService = livroService;
-		this.modelMapper = modelMapper;
-
-	}
+//	public LivroController(LivroService livroService, ModelMapper modelMapper, EmprestimoService emprestimoService) {
+//		// injeção através do Construtor
+//		this.livroService = livroService;
+//		this.modelMapper = modelMapper;
+//		this.emprestimoService = emprestimoService;
+//
+//	}
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
@@ -126,5 +133,25 @@ public class LivroController {
 		 
 	}
 	
-
+	// Sub-recurso de livros
+	@GetMapping("{id}/emprestimos")
+	public Page<EmprestimoFiltroDTO> emprestimosPorLivro(@PathVariable Long id, Pageable pageable){
+		Livro livro = livroService.getById(id)
+				.orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+		
+		Page<Emprestimo> resultado = emprestimoService.getEmprestimosPorLivro(livro, pageable);
+		
+		List<EmprestimoFiltroDTO> list = resultado.getContent()
+				.stream()
+				.map(emprestimo -> { 
+					LivroDTO livroDTO = modelMapper.map(emprestimo.getLivro(), LivroDTO.class);
+					EmprestimoFiltroDTO emprestimoDTO = modelMapper.map(emprestimo, EmprestimoFiltroDTO.class);
+					emprestimoDTO.setLivro(livroDTO);
+					return emprestimoDTO;
+					})
+				.collect(Collectors.toList());
+		
+		return new PageImpl<EmprestimoFiltroDTO>(list, pageable, resultado.getTotalElements());
+		
+	}
 }

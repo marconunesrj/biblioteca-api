@@ -2,6 +2,7 @@ package br.com.xmrtecnologia.bibliotecaapi.model.entity;
 
 import java.time.LocalDate;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -28,6 +29,9 @@ public class Emprestimo {
 	private Long id;
 	
 	private String cliente;
+	
+	@Column(name = "email_cliente")
+	private String emailCliente;
 	
 	@JoinColumn(name="livro_id", nullable=false)
 	@ManyToOne
