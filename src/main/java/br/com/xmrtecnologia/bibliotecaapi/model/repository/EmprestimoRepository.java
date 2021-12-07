@@ -1,5 +1,7 @@
 package br.com.xmrtecnologia.bibliotecaapi.model.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -15,5 +17,14 @@ public interface EmprestimoRepository  extends JpaRepository<Emprestimo, Long> {
 			+ "( e.retornado is null or e.retornado is false ) ")
 	//"select from Emprestimo where livro :livro and retornado is not true"
 	boolean existsByLivroAndNotRetornado(@Param("livro") Livro livro);
+
+	// Sempre que extender JpaRepository e colocar o parâmetro Pageable,
+	//  o método retornará uma página (Page)
+	@Query ( value = " select e from Emprestimo as e join e.livro as l where "
+			+ "l.isbn = :isbn or e.cliente = :cliente ")
+	Page<Emprestimo> findByLivroIsbnOrCliente(
+			@Param("isbn") String isbn, 
+			@Param("cliente") String cliente, 
+			Pageable pageRequest);
 
 }

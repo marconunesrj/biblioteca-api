@@ -27,7 +27,7 @@ public class Emprestimo {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	
-	private String Cliente;
+	private String cliente;
 	
 	@JoinColumn(name="livro_id", nullable=false)
 	@ManyToOne

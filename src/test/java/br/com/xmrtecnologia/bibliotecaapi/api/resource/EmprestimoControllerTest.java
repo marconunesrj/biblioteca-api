@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.hamcrest.Matchers;
@@ -18,6 +19,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,12 +33,14 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.xmrtecnologia.bibliotecaapi.api.dto.EmprestimoDTO;
+import br.com.xmrtecnologia.bibliotecaapi.api.dto.EmprestimoFiltroDTO;
 import br.com.xmrtecnologia.bibliotecaapi.api.dto.RetornadoEmprestimoDTO;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
 import br.com.xmrtecnologia.bibliotecaapi.exception.BusinessException;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Emprestimo;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
+import br.com.xmrtecnologia.bibliotecaapi.service.EmprestimoServiceTest;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -69,7 +76,7 @@ public class EmprestimoControllerTest {
 		
 		Emprestimo emprestimo = Emprestimo.builder()
 										.id(1l)
-										.Cliente("Fulano")
+										.cliente("Fulano")
 										.livro(livro)
 										.dataEmprestimo(LocalDate.now())
 										.retornado(false).build();
@@ -164,7 +171,7 @@ public class EmprestimoControllerTest {
 		
 		Emprestimo emprestimo = Emprestimo.builder()
 				.id(1l)
-				.Cliente("Fulano")
+				.cliente("Fulano")
 				.livro(livro)
 				.dataEmprestimo(LocalDate.now())
 				.build();
@@ -228,5 +235,42 @@ public class EmprestimoControllerTest {
 		
 	}
 	
+	@Test
+	@DisplayName("Deve filtrar empréstimos em uma busca")
+	public void buscarLivrosTest() throws Exception {
+		
+		// cenário
+		Long id = 1l;
+		
+		Emprestimo emprestimo = EmprestimoServiceTest.criarEmprestimo();
+		emprestimo.setId(id);
+		Livro livro = Livro.builder().id(id).isbn("321").build();
+		emprestimo.setLivro(livro);
+				
+		Page<Emprestimo> paginacao = new PageImpl<Emprestimo>( Arrays.asList(emprestimo), 
+				PageRequest.of(0, 10) , 1l);
+		
+		BDDMockito.given(emprestimoService.listar(Mockito.any(EmprestimoFiltroDTO.class), 
+				Mockito.any(Pageable.class)))
+					.willReturn( (Page<Emprestimo>) paginacao );
+		
+		
+		// "/emprestimos?"
+		String queryString = String.format("?isbn=%s&cliente=%s&page=0&size=10", 
+				emprestimo.getLivro().getIsbn(), emprestimo.getCliente());
+		
+		MockHttpServletRequestBuilder request = MockMvcRequestBuilders
+													.get(EMPRESTIMO_API.concat(queryString))
+													.accept(MediaType.APPLICATION_JSON);
+		
+		mvc
+			.perform(request)
+			.andExpect( status().isOk() )
+			.andExpect( jsonPath("content", Matchers.hasSize(1)))
+			.andExpect( jsonPath("totalElements").value(1) )
+			.andExpect( jsonPath("pageable.pageSize").value(10))
+			.andExpect( jsonPath("pageable.pageNumber").value(0));
+	}
 	
+
 }

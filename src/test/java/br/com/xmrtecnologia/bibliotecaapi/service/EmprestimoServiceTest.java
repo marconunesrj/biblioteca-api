@@ -5,17 +5,25 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mockito;
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import br.com.xmrtecnologia.bibliotecaapi.api.dto.EmprestimoFiltroDTO;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.impl.EmprestimoServiceImpl;
 import br.com.xmrtecnologia.bibliotecaapi.exception.BusinessException;
@@ -30,12 +38,15 @@ public class EmprestimoServiceTest {
 
 	EmprestimoService emprestimoService;
 
+	@InjectMocks
+	ModelMapper modelMapper;
+	
 	@MockBean
 	EmprestimoRepository emprestimoRepository;
 
 	@BeforeEach
 	public void setUp() {
-		this.emprestimoService = new EmprestimoServiceImpl(emprestimoRepository);
+		this.emprestimoService = new EmprestimoServiceImpl(emprestimoRepository, modelMapper);
 	}
 
 	@Test
@@ -47,7 +58,7 @@ public class EmprestimoServiceTest {
 		String cliente = "Fulano";
 		Emprestimo emprestimoAserSalvo = Emprestimo.builder()
 				.livro(livro)
-				.Cliente(cliente)
+				.cliente(cliente)
 				.dataEmprestimo(LocalDate.now())  // obrigatório
 				.retornado(true)  // atributo obrigatório para poder salvar Regra de negócio
 				.build();
@@ -55,7 +66,7 @@ public class EmprestimoServiceTest {
 		Emprestimo emprestimoSalvo = Emprestimo.builder()
 				.id(1l)
 				.livro(livro)
-				.Cliente(cliente)
+				.cliente(cliente)
 				.dataEmprestimo(LocalDate.now())
 				.retornado(false)
 				.build();
@@ -103,11 +114,11 @@ public class EmprestimoServiceTest {
 		
 	}
 
-	private Emprestimo criarEmprestimo() {
+	public static Emprestimo criarEmprestimo() {
 		Livro livro = Livro.builder().id(1l).build();
 		Emprestimo emprestimoAserSalvo = Emprestimo.builder()
 				.livro(livro)
-				.Cliente("Fulano")
+				.cliente("Fulano")
 				.dataEmprestimo(LocalDate.now()) // obrigatório
 				.retornado(false)  // obrigatório
 				.build();
@@ -161,7 +172,43 @@ public class EmprestimoServiceTest {
 	
 	}
 	
+	@Test
+	@DisplayName("Deve filtrar empréstimos pelas propriedades")
+	public void listarEmprestimosFiltradosTest() {
+
+		// cenário
+		EmprestimoFiltroDTO emprestimoFiltroDTO = EmprestimoFiltroDTO.builder().cliente("Fulano").isbn("321").build();
+		Emprestimo emprestimo = criarEmprestimo();
+		emprestimo.setId(1l);
+		
+		PageRequest pageRequest = PageRequest.of(0, 10);
+		List<Emprestimo> lista = Arrays.asList(emprestimo);
+		
+		Page<Emprestimo> paginacao = new PageImpl<Emprestimo>(lista, pageRequest, lista.size());
+		
+		// Funciona
+//		Mockito
+//		.when(emprestimoRepository.findAll(Mockito.any(Example.class), Mockito.any(PageRequest.class)))
+//			.thenReturn(paginacao);
+		// ou
+		Mockito
+		.when(emprestimoRepository.findByLivroIsbnOrCliente(Mockito.anyString(), 
+				Mockito.anyString(),
+				Mockito.any(PageRequest.class)))
+					.thenReturn(paginacao);
 	
+		// Execução
+		Page<Emprestimo> resultado = emprestimoService.listar(emprestimoFiltroDTO, pageRequest);
+		
+		// verificação
+		assertThat(resultado.getTotalElements()).isEqualTo(1);
+		assertThat(resultado.getContent()).isEqualTo(lista);
+		assertThat(resultado.getPageable().getPageNumber()).isEqualTo(0);
+		assertThat(resultado.getPageable().getPageSize()).isEqualTo(10);
+		
+		
+	}
+
 //	@Test
 //	@DisplayName()
 //	public void  {
