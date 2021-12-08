@@ -30,6 +30,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.xmrtecnologia.bibliotecaapi.api.dto.LivroDTO;
+import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
 import br.com.xmrtecnologia.bibliotecaapi.exception.BusinessException;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
@@ -51,6 +52,9 @@ public class LivroControllerTest {
 
 	@MockBean
 	LivroService service;
+
+	@MockBean
+	EmprestimoService emprestimoService;
 
 	@Test
 	@DisplayName("Deve adicionar um novo livro com sucesso.") // Anotação do JUnit5
