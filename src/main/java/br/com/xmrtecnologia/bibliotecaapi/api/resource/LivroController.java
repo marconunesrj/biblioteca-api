@@ -32,16 +32,19 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/livros")
 @RequiredArgsConstructor  // cria o construtor para as propriedades final
 @Api("Livro API")
+@Slf4j  // para o Log
 public class LivroController { 
 
 	private final LivroService livroService;
 	private final ModelMapper modelMapper;
 	private final EmprestimoService emprestimoService;
+
 	
 
 //	public LivroController(LivroService livroService, ModelMapper modelMapper, EmprestimoService emprestimoService) {
@@ -57,6 +60,7 @@ public class LivroController {
 	@ApiOperation("Adicionar um Livro")
 	public LivroDTO adicionar( @RequestBody @Valid LivroDTO dto) {
 		
+		log.info("Adicionando um Livro para o Isbn: {} ", dto.getIsbn());
 //		Livro livro = Livro.builder()
 //				.autor(dto.getAutor())
 //				.titulo(dto.getTitulo())
@@ -83,6 +87,7 @@ public class LivroController {
 	@GetMapping("{id}")
 	@ApiOperation("Buscar um livro pelo seu Id")
 	public LivroDTO buscar ( @PathVariable Long id) {
+		log.info("Buscar um Livro com o Id: {} ", id);
 		return livroService
 				.getById(id).map(livro -> modelMapper.map(livro, LivroDTO.class))
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -108,6 +113,7 @@ public class LivroController {
 	@PutMapping("{id}")
 	@ApiOperation("Atualizar as informações de um livro pelo seu Id")
 	public LivroDTO atualizar ( @PathVariable Long id, @RequestBody @Valid LivroDTO dto) {
+		log.info("Atualizando um Livro com o Id: {} ", id);
 		
 		return livroService.getById(id)
 				.map( livro -> {
@@ -141,6 +147,7 @@ public class LivroController {
 		@ApiResponse(code = 404, message = "Livro Não encontrado.")
 	})
 	public void excluir ( @PathVariable Long id) {
+		log.info("Excluir um Livro com o Id: {} ", id);
 		Livro livro = livroService.getById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 		livroService.excluir(livro);

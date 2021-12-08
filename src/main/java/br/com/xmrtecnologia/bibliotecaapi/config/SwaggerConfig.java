@@ -1,7 +1,5 @@
 package br.com.xmrtecnologia.bibliotecaapi.config;
 
-import java.lang.annotation.Annotation;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +16,8 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 public class SwaggerConfig {
 
+	// Visualizar a documentação na url: http://localhost:8080/swagger-ui.html
+	
 	@Bean
 	public Docket docket() {
 		return new Docket(DocumentationType.SWAGGER_2)
