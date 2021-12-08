@@ -27,11 +27,16 @@ import br.com.xmrtecnologia.bibliotecaapi.domain.service.EmprestimoService;
 import br.com.xmrtecnologia.bibliotecaapi.domain.service.LivroService;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Emprestimo;
 import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/livros")
 @RequiredArgsConstructor  // cria o construtor para as propriedades final
+@Api("Livro API")
 public class LivroController { 
 
 	private final LivroService livroService;
@@ -49,6 +54,7 @@ public class LivroController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
+	@ApiOperation("Adicionar um Livro")
 	public LivroDTO adicionar( @RequestBody @Valid LivroDTO dto) {
 		
 //		Livro livro = Livro.builder()
@@ -75,6 +81,7 @@ public class LivroController {
 	}
 	
 	@GetMapping("{id}")
+	@ApiOperation("Buscar um livro pelo seu Id")
 	public LivroDTO buscar ( @PathVariable Long id) {
 		return livroService
 				.getById(id).map(livro -> modelMapper.map(livro, LivroDTO.class))
@@ -83,6 +90,7 @@ public class LivroController {
 	
 	// Passando parâmetros pela URL "/livros?titulo=%s&autor=%s&page=0&size=100"
 	@GetMapping
+	@ApiOperation("Buscar livros pelos filtros: Isbn, Autor ou Título")
 	public Page<LivroDTO> listar ( LivroDTO livroDTO, Pageable pageRequest) {
 		Livro filtro = modelMapper.map(livroDTO, Livro.class);
 		
@@ -98,6 +106,7 @@ public class LivroController {
 	}
 	
 	@PutMapping("{id}")
+	@ApiOperation("Atualizar as informações de um livro pelo seu Id")
 	public LivroDTO atualizar ( @PathVariable Long id, @RequestBody @Valid LivroDTO dto) {
 		
 		return livroService.getById(id)
@@ -126,6 +135,11 @@ public class LivroController {
 	
 	@DeleteMapping("{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@ApiOperation("Excluir um livro pelo seu Id")
+	@ApiResponses({
+		@ApiResponse(code = 204, message = "Livro excluído com sucesso."),
+		@ApiResponse(code = 404, message = "Livro Não encontrado.")
+	})
 	public void excluir ( @PathVariable Long id) {
 		Livro livro = livroService.getById(id)
 				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -135,6 +149,7 @@ public class LivroController {
 	
 	// Sub-recurso de livros
 	@GetMapping("{id}/emprestimos")
+	@ApiOperation("Buscar os Empréstimos de um determinado livro pelo seu Id")
 	public Page<EmprestimoFiltroDTO> emprestimosPorLivro(@PathVariable Long id, Pageable pageable){
 		Livro livro = livroService.getById(id)
 				.orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
