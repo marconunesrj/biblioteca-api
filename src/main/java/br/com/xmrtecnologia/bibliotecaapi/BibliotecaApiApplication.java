@@ -6,6 +6,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
+// Para gerar .war 
+//   1- Deve-se colocar no arquivo pom.xml: <scope>provided</scope> 
+//   2- Deve-se colocar na classe main (BibliotecaApiApplication): extends SpringBootServeletInitializer
+//         public class BibliotecaApiApplication extends SpringBootServeletInitializer { 
+//
+
 @SpringBootApplication
 @EnableScheduling  // Utilizado para agendamento de tarefas
 public class BibliotecaApiApplication { 
