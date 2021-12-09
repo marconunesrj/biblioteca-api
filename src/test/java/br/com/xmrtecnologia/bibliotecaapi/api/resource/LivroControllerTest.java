@@ -41,7 +41,7 @@ import br.com.xmrtecnologia.bibliotecaapi.model.entity.Livro;
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 // Para subir Somente o Controller de Livro quando for Fazer os Testes
-@WebMvcTest(controllers = (LivroController.class))
+@WebMvcTest(controllers = LivroController.class)
 @AutoConfigureMockMvc
 public class LivroControllerTest {
 
